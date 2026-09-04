@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_prefix="WFS_")
 
     environment: Literal["local", "test", "production"] = "local"
+    database_url: str = "postgresql+asyncpg://workflow_studio:workflow_studio@localhost:5432/workflow_studio"
 
 
 @lru_cache
