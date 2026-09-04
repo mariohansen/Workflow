@@ -3,18 +3,11 @@ export interface Position {
   y: number;
 }
 
-export interface PortDescriptor {
-  name: string;
-  label: string;
-}
-
 export interface WorkflowNode {
   id: string;
   type: string;
-  label: string;
   position: Position;
-  inputs: PortDescriptor[];
-  outputs: PortDescriptor[];
+  config: Record<string, unknown>;
 }
 
 export interface WorkflowEdge {

@@ -11,6 +11,7 @@ class Settings(BaseSettings):
 
     environment: Literal["local", "test", "production"] = "local"
     database_url: str = "postgresql+asyncpg://workflow_studio:workflow_studio@localhost:5432/workflow_studio"
+    cors_origins: list[str] = ["http://localhost:4200"]
 
 
 @lru_cache

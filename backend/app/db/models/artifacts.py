@@ -6,7 +6,7 @@ from sqlalchemy import CheckConstraint, ForeignKey, Text
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.db.models.base import Base, CreatedAtMixin
+from app.db.models.base import Base, CreatedAtMixin, pg_enum
 from app.domain.artifacts import ArtifactKind
 from app.domain.ids import new_id
 
@@ -25,7 +25,7 @@ class Artifact(CreatedAtMixin, Base):
     __table_args__ = (CheckConstraint(_EXACTLY_ONE_PAYLOAD, name="payload_matches_kind"),)
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=new_id)
-    kind: Mapped[ArtifactKind]
+    kind: Mapped[ArtifactKind] = mapped_column(pg_enum(ArtifactKind))
     produced_by_step_run_id: Mapped[uuid.UUID] = mapped_column(
         ForeignKey("step_runs.id"), index=True
     )

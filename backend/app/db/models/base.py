@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+import enum
 import uuid
 from datetime import datetime
 
-from sqlalchemy import DateTime, MetaData, Uuid, func
+from sqlalchemy import DateTime, Enum, MetaData, Uuid, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 NAMING_CONVENTION = {
@@ -25,3 +26,10 @@ class Base(DeclarativeBase):
 
 class CreatedAtMixin:
     created_at: Mapped[datetime] = mapped_column(server_default=func.now())
+
+
+def pg_enum(enum_cls: type[enum.Enum]) -> Enum:
+    """Postgres enum storing member *values* (e.g. "text"), not member names
+    (e.g. "TEXT") - SQLAlchemy defaults to names, which then can't satisfy
+    CHECK constraints written against the domain enum's own string values."""
+    return Enum(enum_cls, values_callable=lambda cls: [member.value for member in cls])

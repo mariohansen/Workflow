@@ -1,16 +1,22 @@
 import { ClassicPreset as Classic, type NodeEditor } from 'rete';
 import type { AreaPlugin } from 'rete-area-plugin';
 import type { WorkflowEdge, WorkflowGraph, WorkflowNode } from '../graph.model';
+import { NODE_TYPES } from '../node-types';
 import { anySocket, ReteConnection, ReteNode, type Schemes } from './schemes';
 
 function buildReteNode(node: WorkflowNode): ReteNode {
-  const reteNode = new ReteNode(node.type, node.label);
+  const descriptor = NODE_TYPES[node.type];
+  if (!descriptor) {
+    throw new Error(`unknown node type: ${node.type}`);
+  }
+
+  const reteNode = new ReteNode(node.type, descriptor.label, node.config);
   reteNode.id = node.id;
 
-  for (const input of node.inputs) {
+  for (const input of descriptor.inputs) {
     reteNode.addInput(input.name, new Classic.Input(anySocket, input.label));
   }
-  for (const output of node.outputs) {
+  for (const output of descriptor.outputs) {
     reteNode.addOutput(output.name, new Classic.Output(anySocket, output.label));
   }
 
@@ -55,16 +61,8 @@ export function exportGraph<AreaExtra>(
   const nodes: WorkflowNode[] = editor.getNodes().map((node) => ({
     id: node.id,
     type: node.workflowType,
-    label: node.label,
     position: area.nodeViews.get(node.id)?.position ?? { x: 0, y: 0 },
-    inputs: Object.entries(node.inputs).map(([name, input]) => ({
-      name,
-      label: input?.label ?? name,
-    })),
-    outputs: Object.entries(node.outputs).map(([name, output]) => ({
-      name,
-      label: output?.label ?? name,
-    })),
+    config: node.config,
   }));
 
   const edges: WorkflowEdge[] = editor.getConnections().map((connection) => ({

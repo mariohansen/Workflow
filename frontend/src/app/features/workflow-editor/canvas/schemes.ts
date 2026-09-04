@@ -7,6 +7,7 @@ export class ReteNode extends Classic.Node {
   constructor(
     public readonly workflowType: string,
     label: string,
+    public readonly config: Record<string, unknown>,
   ) {
     super(label);
   }

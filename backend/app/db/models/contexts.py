@@ -5,7 +5,7 @@ import uuid
 from sqlalchemy import CheckConstraint, ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.db.models.base import Base, CreatedAtMixin
+from app.db.models.base import Base, CreatedAtMixin, pg_enum
 from app.domain.contexts import ContextItemKind
 from app.domain.ids import new_id
 
@@ -34,7 +34,7 @@ class ContextItem(CreatedAtMixin, Base):
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=new_id)
     context_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("contexts.id"), index=True)
-    kind: Mapped[ContextItemKind]
+    kind: Mapped[ContextItemKind] = mapped_column(pg_enum(ContextItemKind))
 
     document_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("documents.id"))
     statement: Mapped[str | None] = mapped_column(Text)

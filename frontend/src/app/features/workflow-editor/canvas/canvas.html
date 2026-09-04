@@ -1,1 +1,9 @@
+<div class="toolbar">
+  <button type="button" (click)="onSave()" [disabled]="store.saving()">
+    {{ store.saving() ? 'Saving…' : 'Save' }}
+  </button>
+  @if (store.version(); as version) {
+    <span class="version">v{{ version }}</span>
+  }
+</div>
 <div #container class="container"></div>
