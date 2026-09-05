@@ -76,33 +76,16 @@ async def test_second_save_creates_a_new_version(client: httpx.AsyncClient) -> N
 
 
 @pytest.mark.asyncio
-async def test_cycle_is_rejected_with_422(client: httpx.AsyncClient) -> None:
-    create = await client.post("/workflows", json={"name": "Cyclic"})
+async def test_unknown_node_type_is_rejected_with_422(client: httpx.AsyncClient) -> None:
+    create = await client.post("/workflows", json={"name": "Invalid"})
     workflow_id = create.json()["id"]
 
     node_a = "44444444-4444-4444-4444-444444444444"
-    node_b = "55555555-5555-5555-5555-555555555555"
     graph = {
         "nodes": [
-            {"id": node_a, "type": "prompt", "position": {"x": 0, "y": 0}, "config": {}},
-            {"id": node_b, "type": "prompt", "position": {"x": 0, "y": 0}, "config": {}},
+            {"id": node_a, "type": "does_not_exist", "position": {"x": 0, "y": 0}, "config": {}},
         ],
-        "edges": [
-            {
-                "id": "66666666-6666-6666-6666-666666666666",
-                "from_node": node_a,
-                "from_port": "out",
-                "to_node": node_b,
-                "to_port": "in",
-            },
-            {
-                "id": "77777777-7777-7777-7777-777777777777",
-                "from_node": node_b,
-                "from_port": "out",
-                "to_node": node_a,
-                "to_port": "in",
-            },
-        ],
+        "edges": [],
     }
 
     response = await client.post(f"/workflows/{workflow_id}/versions", json=graph)
@@ -110,7 +93,7 @@ async def test_cycle_is_rejected_with_422(client: httpx.AsyncClient) -> None:
     assert response.status_code == 422
     body = response.json()
     assert body["code"] == "workflow_validation_failed"
-    assert body["details"][0]["code"] == "cycle"
+    assert body["details"][0]["code"] == "unknown_node_type"
 
 
 @pytest.mark.asyncio

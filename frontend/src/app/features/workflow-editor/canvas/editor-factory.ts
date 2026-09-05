@@ -4,6 +4,7 @@ import { type AngularArea2D, AngularPlugin, Presets as AngularPresets } from 're
 import { type Area2D, AreaExtensions, AreaPlugin } from 'rete-area-plugin';
 import { ConnectionPlugin, Presets as ConnectionPresets } from 'rete-connection-plugin';
 import type { WorkflowGraph } from '../graph.model';
+import type { NodeTypeDescriptor } from '../node-types';
 import { exportGraph, loadGraph } from './graph-adapter';
 import type { Schemes } from './schemes';
 
@@ -18,6 +19,7 @@ export interface WorkflowCanvas {
 export async function createWorkflowCanvas(
   container: HTMLElement,
   injector: Injector,
+  nodeTypes: Readonly<Record<string, NodeTypeDescriptor>>,
 ): Promise<WorkflowCanvas> {
   const editor = new NodeEditor<Schemes>();
   const area = new AreaPlugin<Schemes, AreaExtra>(container);
@@ -38,7 +40,7 @@ export async function createWorkflowCanvas(
 
   return {
     async loadGraph(graph) {
-      await loadGraph(editor, area, graph);
+      await loadGraph(editor, area, graph, nodeTypes);
       await AreaExtensions.zoomAt(area, editor.getNodes());
     },
     exportGraph() {

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from uuid import UUID
 
@@ -15,10 +15,12 @@ from app.db.repositories.workflows import (
     WorkflowNodeRepository,
     WorkflowRepository,
     WorkflowVersionRepository,
+    load_graph,
 )
 from app.domain.errors import WorkflowNotFoundError, WorkflowValidationError
-from app.domain.graph import Edge, Graph, Node, Position, validate_graph
+from app.domain.graph import Edge, Graph, Node, validate_graph
 from app.domain.ids import new_id
+from app.domain.ports import NodeType
 
 
 @dataclass(frozen=True)
@@ -29,8 +31,9 @@ class WorkflowVersionView:
 
 
 class WorkflowService:
-    def __init__(self, session: AsyncSession) -> None:
+    def __init__(self, session: AsyncSession, node_types: Mapping[str, NodeType]) -> None:
         self._session = session
+        self._node_types = node_types
         self._workflows = WorkflowRepository(session)
         self._versions = WorkflowVersionRepository(session)
         self._nodes = WorkflowNodeRepository(session)
@@ -57,7 +60,7 @@ class WorkflowService:
         nodes = await self._nodes.for_version(version.id)
         edges = await self._edges.for_version(version.id)
         return WorkflowVersionView(
-            id=version.id, version=version.version, graph=_to_domain_graph(nodes, edges)
+            id=version.id, version=version.version, graph=load_graph(nodes, edges)
         )
 
     async def save_version(self, workflow_id: UUID, graph: Graph) -> WorkflowVersionView:
@@ -65,7 +68,7 @@ class WorkflowService:
         if workflow is None:
             raise WorkflowNotFoundError(workflow_id)
 
-        violations = validate_graph(graph)
+        violations = validate_graph(graph, self._node_types)
         if violations:
             raise WorkflowValidationError(violations)
 
@@ -84,27 +87,6 @@ class WorkflowService:
 
         persisted = Graph(nodes=persisted_nodes, edges=persisted_edges)
         return WorkflowVersionView(id=version_row.id, version=version_row.version, graph=persisted)
-
-
-def _to_domain_graph(nodes: list[WorkflowNodeRow], edges: list[WorkflowEdgeRow]) -> Graph:
-    return Graph(
-        nodes=[
-            Node(
-                id=n.id, type=n.type, position=Position(n.position_x, n.position_y), config=n.config
-            )
-            for n in nodes
-        ],
-        edges=[
-            Edge(
-                id=e.id,
-                from_node=e.from_node_id,
-                from_port=e.from_port,
-                to_node=e.to_node_id,
-                to_port=e.to_port,
-            )
-            for e in edges
-        ],
-    )
 
 
 def _persist_nodes(

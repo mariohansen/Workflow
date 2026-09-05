@@ -1,11 +1,11 @@
 import { ClassicPreset as Classic, type NodeEditor } from 'rete';
 import type { AreaPlugin } from 'rete-area-plugin';
 import type { WorkflowEdge, WorkflowGraph, WorkflowNode } from '../graph.model';
-import { NODE_TYPES } from '../node-types';
+import type { NodeTypeDescriptor } from '../node-types';
 import { anySocket, ReteConnection, ReteNode, type Schemes } from './schemes';
 
-function buildReteNode(node: WorkflowNode): ReteNode {
-  const descriptor = NODE_TYPES[node.type];
+function buildReteNode(node: WorkflowNode, nodeTypes: Readonly<Record<string, NodeTypeDescriptor>>): ReteNode {
+  const descriptor = nodeTypes[node.type];
   if (!descriptor) {
     throw new Error(`unknown node type: ${node.type}`);
   }
@@ -39,11 +39,12 @@ export async function loadGraph<AreaExtra>(
   editor: NodeEditor<Schemes>,
   area: AreaPlugin<Schemes, AreaExtra>,
   graph: WorkflowGraph,
+  nodeTypes: Readonly<Record<string, NodeTypeDescriptor>>,
 ): Promise<void> {
   const nodes = new Map<string, ReteNode>();
 
   for (const node of graph.nodes) {
-    const reteNode = buildReteNode(node);
+    const reteNode = buildReteNode(node, nodeTypes);
     nodes.set(node.id, reteNode);
     await editor.addNode(reteNode);
     await area.translate(reteNode.id, node.position);

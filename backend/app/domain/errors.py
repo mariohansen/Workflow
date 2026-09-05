@@ -21,3 +21,19 @@ class WorkflowNotFoundError(DomainError):
     def __init__(self, workflow_id: object) -> None:
         self.workflow_id = workflow_id
         super().__init__(f"workflow {workflow_id} not found")
+
+
+class NoWorkflowVersionError(DomainError):
+    code = "no_workflow_version"
+
+    def __init__(self, workflow_id: object) -> None:
+        self.workflow_id = workflow_id
+        super().__init__(f"workflow {workflow_id} has no saved version to run")
+
+
+class RunNotFoundError(DomainError):
+    code = "run_not_found"
+
+    def __init__(self, run_id: object) -> None:
+        self.run_id = run_id
+        super().__init__(f"run {run_id} not found")

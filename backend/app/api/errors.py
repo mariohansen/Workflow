@@ -3,11 +3,21 @@ from __future__ import annotations
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
-from app.domain.errors import DomainError, WorkflowNotFoundError, WorkflowValidationError
+from app.domain.errors import (
+    DomainError,
+    NoWorkflowVersionError,
+    RunNotFoundError,
+    WorkflowNotFoundError,
+    WorkflowValidationError,
+)
+from app.engine.registry import UnknownStepTypeError
 
 _STATUS_BY_ERROR: dict[type[DomainError], int] = {
     WorkflowNotFoundError: 404,
     WorkflowValidationError: 422,
+    NoWorkflowVersionError: 422,
+    RunNotFoundError: 404,
+    UnknownStepTypeError: 422,
 }
 
 

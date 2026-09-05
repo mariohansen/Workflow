@@ -9,6 +9,7 @@ import {
   inject,
 } from '@angular/core';
 import { DEMO_GRAPH } from '../demo-graph';
+import { NodeTypesStore } from '../state/node-types-store';
 import { WorkflowStore } from '../state/workflow-store';
 import { createWorkflowCanvas, type WorkflowCanvas } from './editor-factory';
 
@@ -24,14 +25,22 @@ export class Canvas implements AfterViewInit, OnDestroy {
   @ViewChild('container') private readonly containerRef!: ElementRef<HTMLDivElement>;
 
   private readonly injector = inject(Injector);
+  private readonly nodeTypesStore = inject(NodeTypesStore);
   protected readonly store = inject(WorkflowStore);
 
   private canvas: WorkflowCanvas | null = null;
 
   async ngAfterViewInit(): Promise<void> {
-    await this.store.openByName(WORKFLOW_NAME);
+    const [nodeTypes] = await Promise.all([
+      this.nodeTypesStore.load(),
+      this.store.openByName(WORKFLOW_NAME),
+    ]);
 
-    this.canvas = await createWorkflowCanvas(this.containerRef.nativeElement, this.injector);
+    this.canvas = await createWorkflowCanvas(
+      this.containerRef.nativeElement,
+      this.injector,
+      nodeTypes,
+    );
     const graph = this.store.graph();
     await this.canvas.loadGraph(graph.nodes.length > 0 ? graph : DEMO_GRAPH);
   }

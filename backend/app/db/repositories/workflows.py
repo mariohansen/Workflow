@@ -6,6 +6,28 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models.workflows import Workflow, WorkflowEdge, WorkflowNode, WorkflowVersion
+from app.domain.graph import Edge, Graph, Node, Position
+
+
+def load_graph(node_rows: list[WorkflowNode], edge_rows: list[WorkflowEdge]) -> Graph:
+    return Graph(
+        nodes=[
+            Node(
+                id=n.id, type=n.type, position=Position(n.position_x, n.position_y), config=n.config
+            )
+            for n in node_rows
+        ],
+        edges=[
+            Edge(
+                id=e.id,
+                from_node=e.from_node_id,
+                from_port=e.from_port,
+                to_node=e.to_node_id,
+                to_port=e.to_port,
+            )
+            for e in edge_rows
+        ],
+    )
 
 
 class WorkflowRepository:

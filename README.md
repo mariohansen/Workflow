@@ -1,13 +1,15 @@
 # Workflow Studio
 
-Self-hosted editor and runner for visual, node-based workflows: connect nodes on
-a canvas, wire outputs to inputs, run the graph.
+Selbst gehosteter Editor und Runner für visuelle, knotenbasierte Workflows: Nodes
+auf einer Fläche verbinden, Ausgänge mit Eingängen verdrahten, den Graphen ausführen.
 
 ```
-Angular (frontend)  ──REST──►  FastAPI (backend)  ──►  PostgreSQL
+Angular (Frontend)  ──REST──►  FastAPI (Backend)  ──►  PostgreSQL
 ```
 
-## Database
+## Datenbank
+
+PostgreSQL 16, lokal installiert oder über Docker Compose:
 
 ```
 cd deploy/compose
@@ -34,3 +36,13 @@ cd frontend
 npm install
 npm start
 ```
+
+## Stand
+
+Grundarchitektur, Datenmodell und Ausführungs-Engine stehen: Workflows lassen sich
+im Editor bauen, als Version speichern und laden und über die API ausführen –
+validiert gegen die registrierten Node-Typen, inklusive Zyklen- und
+Port-Typprüfung. Zwei Node-Typen (Texteingabe, Ausgabe) sind vollständig, weitere
+folgen mit Datei-Upload, Context Vault, Prompt-Versionierung und einem manuellen
+LLM-Provider. Noch offen: echte Nebenläufigkeit über Celery und Redis,
+Containerisierung sowie ein Run-Verlauf im Frontend.

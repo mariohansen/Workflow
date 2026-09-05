@@ -73,10 +73,66 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/node-types": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Node Types */
+        get: operations["list_node_types_node_types_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/workflows/{workflow_id}/runs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Start Run */
+        post: operations["start_run_workflows__workflow_id__runs_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/runs/{run_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Run */
+        get: operations["get_run_runs__run_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /**
+         * ArtifactKind
+         * @enum {string}
+         */
+        ArtifactKind: "text" | "document" | "json";
         /** EdgeDto */
         EdgeDto: {
             /**
@@ -111,6 +167,19 @@ export interface components {
             /** Detail */
             detail?: components["schemas"]["ValidationError"][];
         };
+        /** InputPortDto */
+        InputPortDto: {
+            /** Name */
+            name: string;
+            /** Label */
+            label: string;
+            /** Accepts */
+            accepts: components["schemas"]["ArtifactKind"][];
+            /** Required */
+            required: boolean;
+            /** Multiple */
+            multiple: boolean;
+        };
         /** NodeDto */
         NodeDto: {
             /**
@@ -129,6 +198,33 @@ export interface components {
                 [key: string]: unknown;
             };
         };
+        /** NodeTypeDto */
+        NodeTypeDto: {
+            /** Type */
+            type: string;
+            /** Label */
+            label: string;
+            /** Category */
+            category: string;
+            /** Icon */
+            icon: string;
+            /** Inputs */
+            inputs: components["schemas"]["InputPortDto"][];
+            /** Outputs */
+            outputs: components["schemas"]["OutputPortDto"][];
+            /** Config Schema */
+            config_schema: {
+                [key: string]: unknown;
+            };
+        };
+        /** OutputPortDto */
+        OutputPortDto: {
+            /** Name */
+            name: string;
+            /** Label */
+            label: string;
+            produces: components["schemas"]["ArtifactKind"];
+        };
         /** PositionDto */
         PositionDto: {
             /** X */
@@ -136,6 +232,33 @@ export interface components {
             /** Y */
             y: number;
         };
+        /** RunResponse */
+        RunResponse: {
+            /**
+             * Id
+             * Format: uuid
+             */
+            id: string;
+            status: components["schemas"]["WorkflowRunStatus"];
+            /** Steps */
+            steps: components["schemas"]["StepRunDto"][];
+        };
+        /** StepRunDto */
+        StepRunDto: {
+            /**
+             * Node Id
+             * Format: uuid
+             */
+            node_id: string;
+            status: components["schemas"]["StepRunStatus"];
+            /** Error */
+            error: string | null;
+        };
+        /**
+         * StepRunStatus
+         * @enum {string}
+         */
+        StepRunStatus: "pending" | "running" | "waiting_for_input" | "completed" | "failed" | "skipped";
         /** ValidationError */
         ValidationError: {
             /** Location */
@@ -164,6 +287,11 @@ export interface components {
             /** Name */
             name: string;
         };
+        /**
+         * WorkflowRunStatus
+         * @enum {string}
+         */
+        WorkflowRunStatus: "pending" | "running" | "waiting_for_input" | "completed" | "failed" | "cancelled";
         /** WorkflowVersionResponse */
         WorkflowVersionResponse: {
             /**
@@ -312,6 +440,88 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["WorkflowVersionResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_node_types_node_types_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NodeTypeDto"][];
+                };
+            };
+        };
+    };
+    start_run_workflows__workflow_id__runs_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                workflow_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunResponse"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_run_runs__run_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                run_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RunResponse"];
                 };
             };
             /** @description Validation Error */
